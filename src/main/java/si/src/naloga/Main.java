@@ -2,11 +2,33 @@ package si.src.naloga;
 
 import si.src.naloga.imenik.TelefonskiImenik;
 
+import java.sql.*;
 import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
+
+        // TODO: Okay so we have to make a CRUD Database app, well the first thing we should do is check if a
+        //  connection to the database is even possible.
+        //  If it is possible, then connect and proceed with the program,
+        //  but if the connection isn't possible read the contents of the SQL base from a file
+
+        final String selectStatement = "Select * FROM telefonski_imenik";
+
+
+        try {
+            // Checking if connection to database is possible
+           DriverManager.getConnection("jdbc:mysql://localhost:3306/telefonski_imenik",
+                    "root", "wearenumberone");
+            System.out.println("Connection to database was successful!");
+        }
+        catch (SQLException throwables) {
+            throwables.printStackTrace();
+            System.out.println("Connection to database was not successful!");
+            System.out.println("Reading contents of databsae from file");
+        }
+        
 
         TelefonskiImenik telefonskiImenik = new TelefonskiImenik();
 
@@ -21,10 +43,10 @@ public class Main {
 
             switch (akcija) {
                 case "1":
-                    telefonskiImenik.izpisiVseKontakte();
+                    telefonskiImenik.izpisiVseKontakte(grabConnection().createStatement());
                     break;
                 case "2":
-                    telefonskiImenik.dodajKontakt();
+                    telefonskiImenik.dodajKontakt(grabConnection().createStatement());
                     break;
                 case "3":
                     telefonskiImenik.urediKontakt();
@@ -59,6 +81,11 @@ public class Main {
         }
     }
 
+    private static Connection grabConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/telefonski_imenik",
+                "root", "wearenumberone");
+    }
+
     /**
      * Uporabniku izpišemo menu
      */
@@ -86,3 +113,24 @@ public class Main {
 
     }
 }
+
+/*
+try{
+        // Attempting to connect to database
+        Connection connection=DriverManager.getConnection("jdbc:mysql://localhost:3306/telefonski_imenik","root","wearenumberone");
+
+        // Creating SQL statement
+        Statement testStatement=connection.createStatement();
+
+        // Executing the SQL statement
+        ResultSet response=testStatement.executeQuery(selectStatement);
+
+        // Showing results of SQL statement
+        while(response.next()){
+        System.out.println(response.getString("Ime")+", "+response.getString("Priimek"));
+        }
+        }
+        catch(SQLException throwables){
+        throwables.printStackTrace();
+        System.out.println("Neuspšena povezava do baze podatkov!... Branje podatkov iz datoteke...");
+        }*/

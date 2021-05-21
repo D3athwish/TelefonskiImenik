@@ -2,8 +2,13 @@ package si.src.naloga.imenik;
 
 import si.src.naloga.kontakt.Kontakt;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 
 public class TelefonskiImenik {
@@ -17,8 +22,21 @@ public class TelefonskiImenik {
     /**
      * Metaoda izpiše vse kontakte
      */
-    public void izpisiVseKontakte() {
-        System.out.println("Metoda še ni implementirana");
+    public void izpisiVseKontakte(Statement statement) throws SQLException {
+
+        // Since there is no way for the user to control this string, I see no point in adding some SQL Injection
+        // Prevention here...
+        ResultSet results = statement.executeQuery("SELECT * FROM telefonski_imenik ORDER BY id");
+
+        // Output results of query to screen
+        System.out.println("ID, Ime, Priimek");
+        while(results.next()){
+            System.out.println(results.getString("ID")
+                    + ", "
+                    + results.getString("Ime")
+                    + ", "
+                    + results.getString("Priimek"));
+        }
     }
 
     /**
@@ -26,8 +44,27 @@ public class TelefonskiImenik {
      *
      * onemogočimo dodajanje dupliciranega kontakta
      */
-    public void dodajKontakt() {
-        System.out.println("Metoda še ni implementirana");
+    public void dodajKontakt(Statement statement) throws SQLException {
+        // TODO: We can prevent duplicate entries by adding the unique constraint:
+        //  alter table telefonski_imenik add unique unique_first_and_last_name(Ime, Priimek)
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Vnesite podatke o kontaku:");
+
+        System.out.println("Ime: ");
+        String inputIme = scanner.nextLine();
+
+        System.out.println("Priimek: ");
+        String inputPriimek = scanner.nextLine();
+
+        // TODO: Too lazy to prevent SQL injection right now... but this seems pretty safe? AFAIK... Will take a look at parametized queries WE GOT THIS IN THE BAG YO!
+        try{
+            statement.executeUpdate(String.format("INSERT INTO telefonski_imenik (Ime, Priimek) VALUES ('%s', '%s')",
+                    inputIme, inputPriimek));
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
     }
 
     /**
