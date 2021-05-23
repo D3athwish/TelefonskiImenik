@@ -24,6 +24,7 @@ public class Main {
             throwables.printStackTrace();
             System.out.println("Connection to database was not successful!");
             System.out.println("Reading contents of database from file...");
+            // TODO: This is probably the .ser file?
         }
 
         TelefonskiImenik telefonskiImenik = new TelefonskiImenik();
@@ -77,6 +78,7 @@ public class Main {
         }
     }
 
+    // TODO: Since this is a database app, the reviewers of this code will have to modify this.
     public static Connection grabConnection() throws SQLException {
         return DriverManager.getConnection("jdbc:mysql://localhost:3306/telefonski_imenik",
                 "root", "wearenumberone");
@@ -109,24 +111,3 @@ public class Main {
 
     }
 }
-
-/*
-try{
-        // Attempting to connect to database
-        Connection connection=DriverManager.getConnection("jdbc:mysql://localhost:3306/telefonski_imenik","root","wearenumberone");
-
-        // Creating SQL statement
-        Statement testStatement=connection.createStatement();
-
-        // Executing the SQL statement
-        ResultSet response=testStatement.executeQuery(selectStatement);
-
-        // Showing results of SQL statement
-        while(response.next()){
-        System.out.println(response.getString("Ime")+", "+response.getString("Priimek"));
-        }
-        }
-        catch(SQLException throwables){
-        throwables.printStackTrace();
-        System.out.println("Neuspšena povezava do baze podatkov!... Branje podatkov iz datoteke...");
-        }*/

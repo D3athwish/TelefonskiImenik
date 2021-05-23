@@ -38,8 +38,11 @@ public class TelefonskiImenik {
      * onemogočimo dodajanje dupliciranega kontakta
      */
     public void dodajKontakt() throws SQLException {
-        //  We can prevent duplicate entries by adding the unique constraint:
-        //  alter table telefonski_imenik add unique unique_first_and_last_name(Ime, Priimek)
+        // I used the following constraint to prevent duplicates
+        //  alter table telefonski_imenik add unique unique_kontakt(Ime, Priimek, Naslov, Email, Telefon, Mobilni_telefon, Opomba);
+        // Initially I only had the constraint on Ime and Priimek, because I thought that of course we can't have two of the same people in our database
+        // But in real life, it is possible to have two identically named people, like Gašper Galič :)
+        // But 100% There won't be people with the same NAME, LASTNAME, ADDRESS etc etc.
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Vnesite podatke o kontaku:");
@@ -50,12 +53,33 @@ public class TelefonskiImenik {
         System.out.println("Priimek: ");
         String inputPriimek = scanner.nextLine();
 
+        System.out.println("Naslov: ");
+        String inputNaslov = scanner.nextLine();
+
+        System.out.println("Email: ");
+        String inputEmail = scanner.nextLine();
+
+        System.out.println("Telefon: ");
+        String inputTelefon = scanner.nextLine();
+
+        System.out.println("Mobilni telefon: ");
+        String inputMobilni_telefon = scanner.nextLine();
+
+        System.out.println("Opomba: ");
+        String inputOpomba = scanner.nextLine();
+
         PreparedStatement preparedStatement = Main
                 .grabConnection()
-                .prepareStatement("INSERT INTO telefonski_imenik (Ime, Priimek) VALUES (?, ?)");
+                .prepareStatement("INSERT INTO telefonski_imenik" +
+                        " (Ime, Priimek, Naslov, Email, Telefon, Mobilni_telefon, Opomba) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
         preparedStatement.setString(1, inputIme);
         preparedStatement.setString(2, inputPriimek);
+        preparedStatement.setString(3, inputNaslov);
+        preparedStatement.setString(4, inputEmail);
+        preparedStatement.setString(5, inputTelefon);
+        preparedStatement.setString(6, inputMobilni_telefon);
+        preparedStatement.setString(7, inputOpomba);
 
         executeUpdateStatement(preparedStatement);
     }
@@ -70,19 +94,46 @@ public class TelefonskiImenik {
         System.out.println("Kateri vnos bi radi posodbili?(ID)");
         int inputId = Integer.parseInt(scanner.nextLine());
 
-        System.out.println("Vnesite novo ime:");
+        // Check if the ID we want to edit exists, if it does not cancel the operation and print message
+        if(!checkIfIDexists(inputId)){
+            System.out.println("Izbrani kontakt ne obstaja!");
+            return;
+        }
+
+        System.out.println("Vnesite novo ime: ");
         String inputIme = scanner.nextLine();
 
-        System.out.println("Vnesite nov priimek:");
+        System.out.println("Vnesite nov Priimek: ");
         String inputPriimek = scanner.nextLine();
+
+        System.out.println("Vnesite nov naslov:: ");
+        String inputNaslov = scanner.nextLine();
+
+        System.out.println("Vnesite nov Email: ");
+        String inputEmail = scanner.nextLine();
+
+        System.out.println("Vnesite nov telefon: ");
+        String inputTelefon = scanner.nextLine();
+
+        System.out.println("Vnesite nov mobilni telefon: ");
+        String inputMobilni_telefon = scanner.nextLine();
+
+        System.out.println("Vnesite novo opombo: ");
+        String inputOpomba = scanner.nextLine();
 
         PreparedStatement preparedStatement = Main
                 .grabConnection()
-                .prepareStatement("UPDATE telefonski_imenik SET Ime=?, Priimek=? WHERE ID=?");
+                .prepareStatement("UPDATE telefonski_imenik" +
+                        " SET Ime=?, Priimek=?, Naslov=?, Email=?, Telefon=?, Mobilni_telefon=?, Opomba=? WHERE ID=?");
 
         preparedStatement.setString(1, inputIme);
         preparedStatement.setString(2, inputPriimek);
-        preparedStatement.setInt(3, inputId);
+        preparedStatement.setString(3, inputNaslov);
+        preparedStatement.setString(4, inputEmail);
+        preparedStatement.setString(5, inputTelefon);
+        preparedStatement.setString(6, inputMobilni_telefon);
+        preparedStatement.setString(7, inputOpomba);
+        preparedStatement.setInt(8, inputId);
 
         executeUpdateStatement(preparedStatement);
     }
@@ -95,6 +146,11 @@ public class TelefonskiImenik {
 
         System.out.println("Kateri vnos bi radi izbrisali?(ID)");
         int inputId = Integer.parseInt(scanner.nextLine());
+
+        if(!checkIfIDexists(inputId)){
+            System.out.println("Izbrani kontakt ne obstaja!");
+            return;
+        }
 
         PreparedStatement preparedStatement = Main
                 .grabConnection()
@@ -127,8 +183,15 @@ public class TelefonskiImenik {
     /**
      * Izpis kontakta po ID-ju
      */
-    public void izpisiSteviloKontaktov() {
-        System.out.println("Metoda še ni implementirana");
+    public void izpisiSteviloKontaktov() throws SQLException {
+        ResultSet results = Main
+                .grabConnection()
+                .createStatement()
+                .executeQuery("SELECT COUNT(ID) FROM telefonski_imenik");
+
+        // Output results of query to screen
+        results.next();
+        System.out.println("Stevilo kontakov: " + results.getString(1));
     }
 
     /**
@@ -136,13 +199,22 @@ public class TelefonskiImenik {
      * Ime datoteke naj bo "kontakti.ser"
      */
     public void serializirajSeznamKontaktov() {
-        System.out.println("Metoda še ni implementirana");
+        // TODO: I'm not sure what this is suppose to do...
+        //  Is this suppose to take the input from a SQL query and save it to disk with the extension .ser? Ok, let's try that :)
+
+        // TODO: 1. Query: SELECT *  FROM telefonski_imenik;
+        // TODO: 2. Serialize the query into the Kontakt object and then to the List<Kontakt> seznamKontaktov
+
+
     }
 
     /**
      * Pereberi serializiran seznam kontakotv iz diska
      */
     public void naloziSerializiranSeznamKontakotv() {
+        // TODO: So this is related to serializirajSeznamKontaktov(), so we have to accept the .ser file and deserialize it to the arraylist?
+
+
         System.out.println("Metoda še ni implementirana");
     }
 
@@ -157,22 +229,53 @@ public class TelefonskiImenik {
     private void executeUpdateStatement(PreparedStatement preparedStatement) {
         try{
             preparedStatement.executeUpdate();
-            System.out.println("Statement execution successful!");
+            System.out.println("Operacija je bila uspešno izvedena!");
         }catch (Exception e){
             e.printStackTrace();
-            System.out.println("Statement execution failure!");
+            System.out.println("Operacija ni bila izvedena!");
         }
     }
 
     private void printResults(ResultSet results) throws SQLException {
-        System.out.println("ID\tIme\t\tPriimek");
+        // This isn't exactly ok,... output will look messy if a certain row is large,
+        // can be a bit hacky here and do some tabulators but It's best to stick to a format
+        System.out.println("ID, Ime, Priimek, Naslov, Email, Telefon, Mobilni telefon, Opomba");
 
         while(results.next()){
             System.out.println(results.getString("ID")
-                    + "\t"
+                    + ", "
                     + results.getString("Ime")
-                    + "\t"
-                    + results.getString("Priimek"));
+                    + ", "
+                    + results.getString("Priimek")
+                    + ", "
+                    + results.getString("Naslov")
+                    + ", "
+                    + results.getString("Email")
+                    + ", "
+                    + results.getString("Telefon")
+                    + ", "
+                    + results.getString("Mobilni_telefon")
+                    + ", "
+                    + results.getString("Opomba")
+            );
         }
+    }
+
+    // When updating a row by ID it's possible that the row doesn't exist
+    private Boolean checkIfIDexists(int inputId) throws SQLException {
+        PreparedStatement preparedStatement = Main
+                .grabConnection()
+                .prepareStatement("SELECT COUNT(?) FROM telefonski_imenik WHERE ID=?");
+
+        preparedStatement.setInt(1, inputId);
+        preparedStatement.setInt(2, inputId);
+
+        ResultSet results = preparedStatement.executeQuery();
+
+        results.next();
+
+        int count = Integer.parseInt(results.getString(1));
+        return count > 0;
+
     }
 }
