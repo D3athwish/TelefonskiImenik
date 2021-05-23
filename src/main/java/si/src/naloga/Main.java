@@ -91,7 +91,6 @@ public class Main {
          */
     public static void izpisiMenu() {
         System.out.println("");
-        System.out.println("");
         System.out.println("Aplikacija telefonski imenik:");
         System.out.println("-----------------------------------");
         System.out.println("Akcije:");

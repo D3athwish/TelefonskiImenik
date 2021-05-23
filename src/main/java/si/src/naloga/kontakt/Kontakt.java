@@ -34,64 +34,32 @@ public class Kontakt implements Serializable {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getIme() {
         return ime;
-    }
-
-    public void setIme(String ime) {
-        this.ime = ime;
     }
 
     public String getPriimek() {
         return priimek;
     }
 
-    public void setPriimek(String priimek) {
-        this.priimek = priimek;
-    }
-
     public String getNaslov() {
         return naslov;
-    }
-
-    public void setNaslov(String naslov) {
-        this.naslov = naslov;
     }
 
     public String getEmail() {
         return elektronskaPosta;
     }
 
-    public void setElektronskaPosta(String elektronskaPosta) {
-        this.elektronskaPosta = elektronskaPosta;
-    }
-
     public String getTelefon() {
         return telefon;
-    }
-
-    public void setTelefon(String telefon) {
-        this.telefon = telefon;
     }
 
     public String getMobilniTelefon() {
         return mobilniTelefon;
     }
 
-    public void setMobilniTelefon(String mobilniTelefon) {
-        this.mobilniTelefon = mobilniTelefon;
-    }
-
     public String getOpomba() {
         return opomba;
-    }
-
-    public void setOpomba(String opomba) {
-        this.opomba = opomba;
     }
 
     @Override
