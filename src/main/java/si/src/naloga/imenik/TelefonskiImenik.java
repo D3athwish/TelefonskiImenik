@@ -24,14 +24,14 @@ public class TelefonskiImenik {
      * Metaoda izpiše vse kontakte
      */
     public void izpisiVseKontakte() throws SQLException {
-        // Getting all values from table
-        // No need for a PreparedStatement since we have no user input
+        // Pridobimo vse vnose iz baze
+        // Ne rabimo preparedStatement, ker nimamo uporabnikovega vnosa
         ResultSet results = Main
                 .grabConnection()
                 .createStatement()
                 .executeQuery("SELECT * FROM telefonski_imenik ORDER BY id");
 
-        // Output results of query to screen
+        // izpisi rezultat
         printResults(results);
     }
 
@@ -41,15 +41,15 @@ public class TelefonskiImenik {
      * onemogočimo dodajanje dupliciranega kontakta
      */
     public void dodajKontakt() throws SQLException {
-        // I used the following constraint to prevent duplicates
-        //  alter table telefonski_imenik add unique unique_kontakt(Ime, Priimek, Naslov, Email, Telefon, Mobilni_telefon, Opomba);
-        // Initially I only had the constraint on Ime and Priimek, because I thought that of course we can't have two of the same people in our database
-        // But in real life, it is possible to have two identically named people, like Gašper Galič :)
-        // But 100% There won't be people with the same NAME, LASTNAME, ADDRESS etc etc.
+        // Za preprečevanje duplikatov v bazi sem uporabil sledeči constraint:
+        // alter table telefonski_imenik add unique unique_kontakt(Ime, Priimek, Naslov, Email, Telefon, Mobilni_telefon, Opomba);
+
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Vnesite podatke o kontaku:");
 
+        // Ko exportamo v .CSV je mozen bug: Če uporabimo vejico kot ločitelj med celicami, bomo pokvarili export.
+        // Zato potrebujemo replace
         System.out.println("Ime: ");
         String inputIme = scanner.nextLine().replace(",", "");
 
@@ -93,9 +93,7 @@ public class TelefonskiImenik {
      * ID kontakta ni mogoče spreminjati
      */
     public void urediKontakt() throws SQLException {
-        // This task specifically mentions that we shouldn't be able to edit the ID,
-        // or create a wrong user input like a character.
-        // Why not just disable editing of ID by not creating a statement for it?
+        // V navodilih naloga pravi, da ne smemo urediti IDja, torej pri urejanju vnosov ne omogočamo tega
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Kateri vnos bi radi posodbili?(ID)");
@@ -196,7 +194,7 @@ public class TelefonskiImenik {
                 .createStatement()
                 .executeQuery("SELECT COUNT(ID) FROM telefonski_imenik");
 
-        // Output results of query to screen
+        // Prikazi rezultat
         results.next();
         System.out.println("Stevilo kontakov: " + results.getString(1));
     }
@@ -206,18 +204,15 @@ public class TelefonskiImenik {
      * Ime datoteke naj bo "kontakti.ser"
      */
     public void serializirajSeznamKontaktov() throws SQLException {
-        // TODO: 1. Query: SELECT *  FROM telefonski_imenik;
-        // TODO: 2. Serialize the query into the Kontakt object and then to the List<Kontakt> seznamKontaktov
-
-        // So get the query first
+        // Najprej pridobimo vse vnose iz baze, sortirani so po IDju
         ResultSet results = Main
                 .grabConnection()
                 .createStatement()
                 .executeQuery("SELECT * FROM telefonski_imenik ORDER BY id");
 
-        // Loop over results
+        // Loop skozi rezultate
         while(results.next()){
-            // Assign each individual column to variable
+            // Vse parametre inicializramo na začasne spremenljivke
             int ID = results.getInt("ID");
             String ime = results.getString("Ime");
             String priimek = results.getString("Priimek");
@@ -227,11 +222,11 @@ public class TelefonskiImenik {
             String mobilniTelefon = results.getString("Mobilni_telefon");
             String opomba = results.getString("Opomba");
 
-            // Set variables to object
+            // Kreiramo nov objekt in ga dodamo na ArrayList seznam kontaktov
             seznamKontaktov.add(new Kontakt(ID, ime, priimek, naslov, email, telefon, mobilniTelefon, opomba));
         }
 
-        // Now output the arrayList seznamKontaktov to a file named kontakti.ser
+        // Export seznamKontaktov v Kontakti.ser
         try{
             FileOutputStream fileOutputStream = new FileOutputStream("Kontakti.ser");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
@@ -247,11 +242,12 @@ public class TelefonskiImenik {
      * Pereberi serializiran seznam kontakotv iz diska
      */
     public void naloziSerializiranSeznamKontakotv() throws SQLException {
-        // Clearing arrayList and resetting to prevent overloading of arraylist
+        // odstranimo vse obstoječe vnose iz seznamKontaktov, da je vedno List prazen pred dodajanjem novih
         seznamKontaktov.clear();
+        // Serilizacija napolni seznamKontaktov nazaj
         serializirajSeznamKontaktov();
 
-        // Load file to seznamKontaktov
+        // Branje iz datoteke Kontakti.ser
         try{
             FileInputStream fileInputStream = new FileInputStream("Kontakti.ser");
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
@@ -263,7 +259,7 @@ public class TelefonskiImenik {
             System.out.println("Datoteka Kontakti.ser verjetno ne obstaja...");
         }
 
-        // Then we have to show results of seznamKontaktov after deserialization
+        // Prikaz podatkov po deserializaciji
         System.out.println("ID, Ime, Priimek, Naslov, Email, Telefon, Mobilni telefon, Opomba");
         for (Kontakt kontakt : seznamKontaktov) {
             System.out.print(kontakt.getId() + ", ");
@@ -275,7 +271,7 @@ public class TelefonskiImenik {
             System.out.print(kontakt.getMobilniTelefon() + ", ");
             System.out.print(kontakt.getOpomba());
 
-            //Create new line
+            // Nova vrstica za ločevanje vnosov
             System.out.println();
         }
     }
@@ -285,7 +281,6 @@ public class TelefonskiImenik {
      * Naj uporabnik sam izbere ime izhodne datoteke.
      */
     public void izvoziPodatkeVCsvDatoteko() throws IOException, SQLException {
-        // Clearing arrayList and resetting to prevent overloading of arraylist
         seznamKontaktov.clear();
         serializirajSeznamKontaktov();
 
@@ -293,6 +288,7 @@ public class TelefonskiImenik {
         Scanner scanner = new Scanner(System.in);
         String imeDatoteke = scanner.nextLine();
 
+        // V primeru če imamo znak, kateri ne sme biti v imenu datoteke to preprečimo in zahtevamo nov vnos
         while(imeDatoteke.matches(".*[\\\\/:*\"<>|].*")){
             System.out.println("Nedovoljeni znak, vnesite ime datoteke brez: \\, /, :, *, \", <, >, |");
             imeDatoteke = scanner.nextLine();
@@ -331,6 +327,7 @@ public class TelefonskiImenik {
         System.out.println("Priimek ali ime(Vnesite P za priimek, I za ime): ");
         String ImeAliPriimek = scanner.nextLine();
 
+        // Uporabnika pošljemo na določeno funkcijo glede na njegov vnos
         if(ImeAliPriimek.equals("I")){
             iskanjePodatkovPoImenu();
         }else if(ImeAliPriimek.equals("P")){
@@ -350,9 +347,9 @@ public class TelefonskiImenik {
         }
     }
 
+    // Izpis rezultatov
     private void printResults(ResultSet results) throws SQLException {
-        // This isn't exactly ok,... output will look messy if a certain row is large,
-        // can be a bit hacky here and do some tabulators but It's best to stick to a format
+        // Tak izpis sicer ni ok, zato ker ni pregleden saj so Stringi različnih velikosti
         System.out.println("ID, Ime, Priimek, Naslov, Email, Telefon, Mobilni telefon, Opomba");
 
         while(results.next()){
@@ -375,7 +372,7 @@ public class TelefonskiImenik {
         }
     }
 
-    // When updating a row by ID it's possible that the row doesn't exist
+    // Ko posodabljamo ID, je moznost da ID ne obstaja
     private Boolean checkIfIDexists(int inputId) throws SQLException {
         PreparedStatement preparedStatement = Main
                 .grabConnection()
