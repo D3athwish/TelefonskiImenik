@@ -5,9 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d772ae66-4953-442f-82e2-107fa1bbb763" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TelefonskiImenik.iml" beforeDir="false" afterPath="$PROJECT_DIR$/TelefonskiImenik.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/si/src/naloga/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/si/src/naloga/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/si/src/naloga/imenik/TelefonskiImenik.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/si/src/naloga/imenik/TelefonskiImenik.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/si/src/naloga/kontakt/Kontakt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/si/src/naloga/kontakt/Kontakt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/si/src/naloga/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/si/src/naloga/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/si/src/naloga/imenik/TelefonskiImenik.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/si/src/naloga/imenik/TelefonskiImenik.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/si/src/naloga/kontakt/Kontakt.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/si/src/naloga/kontakt/Kontakt.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,5 +90,16 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/si/src/naloga/imenik/TelefonskiImenik.java</url>
+          <line>409</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

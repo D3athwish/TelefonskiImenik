@@ -3,7 +3,10 @@ package si.src.naloga.imenik;
 import si.src.naloga.Main;
 import si.src.naloga.kontakt.Kontakt;
 
-import java.sql.*;
+import java.io.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -48,25 +51,26 @@ public class TelefonskiImenik {
         System.out.println("Vnesite podatke o kontaku:");
 
         System.out.println("Ime: ");
-        String inputIme = scanner.nextLine();
+        String inputIme = scanner.nextLine().replace(",", "");
 
         System.out.println("Priimek: ");
-        String inputPriimek = scanner.nextLine();
+        String inputPriimek = scanner.nextLine().replace(",", "");
 
         System.out.println("Naslov: ");
-        String inputNaslov = scanner.nextLine();
+        String inputNaslov = scanner.nextLine().replace(",", "");
 
         System.out.println("Email: ");
-        String inputEmail = scanner.nextLine();
+        String inputEmail = scanner.nextLine().replace(",", "");
 
         System.out.println("Telefon: ");
-        String inputTelefon = scanner.nextLine();
+        String inputTelefon = scanner.nextLine().replace(",", "");
 
         System.out.println("Mobilni telefon: ");
-        String inputMobilni_telefon = scanner.nextLine();
+        String inputMobilni_telefon = scanner.nextLine().replace(",", "");
 
         System.out.println("Opomba: ");
-        String inputOpomba = scanner.nextLine();
+        String inputOpomba = scanner.nextLine().replace(",", "");
+
 
         PreparedStatement preparedStatement = Main
                 .grabConnection()
@@ -89,6 +93,9 @@ public class TelefonskiImenik {
      * ID kontakta ni mogoče spreminjati
      */
     public void urediKontakt() throws SQLException {
+        // This task specifically mentions that we shouldn't be able to edit the ID,
+        // or create a wrong user input like a character.
+        // Why not just disable editing of ID by not creating a statement for it?
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Kateri vnos bi radi posodbili?(ID)");
@@ -101,25 +108,25 @@ public class TelefonskiImenik {
         }
 
         System.out.println("Vnesite novo ime: ");
-        String inputIme = scanner.nextLine();
+        String inputIme = scanner.nextLine().replace(",", "");
 
         System.out.println("Vnesite nov Priimek: ");
-        String inputPriimek = scanner.nextLine();
+        String inputPriimek = scanner.nextLine().replace(",", "");
 
-        System.out.println("Vnesite nov naslov:: ");
-        String inputNaslov = scanner.nextLine();
+        System.out.println("Vnesite nov naslov: ");
+        String inputNaslov = scanner.nextLine().replace(",", "");
 
         System.out.println("Vnesite nov Email: ");
-        String inputEmail = scanner.nextLine();
+        String inputEmail = scanner.nextLine().replace(",", "");
 
         System.out.println("Vnesite nov telefon: ");
-        String inputTelefon = scanner.nextLine();
+        String inputTelefon = scanner.nextLine().replace(",", "");
 
         System.out.println("Vnesite nov mobilni telefon: ");
-        String inputMobilni_telefon = scanner.nextLine();
+        String inputMobilni_telefon = scanner.nextLine().replace(",", "");
 
         System.out.println("Vnesite novo opombo: ");
-        String inputOpomba = scanner.nextLine();
+        String inputOpomba = scanner.nextLine().replace(",", "");
 
         PreparedStatement preparedStatement = Main
                 .grabConnection()
@@ -198,32 +205,139 @@ public class TelefonskiImenik {
      * Serializiraj seznam kontoktov na disk.
      * Ime datoteke naj bo "kontakti.ser"
      */
-    public void serializirajSeznamKontaktov() {
-        // TODO: I'm not sure what this is suppose to do...
-        //  Is this suppose to take the input from a SQL query and save it to disk with the extension .ser? Ok, let's try that :)
-
+    public void serializirajSeznamKontaktov() throws SQLException {
         // TODO: 1. Query: SELECT *  FROM telefonski_imenik;
         // TODO: 2. Serialize the query into the Kontakt object and then to the List<Kontakt> seznamKontaktov
 
+        // So get the query first
+        ResultSet results = Main
+                .grabConnection()
+                .createStatement()
+                .executeQuery("SELECT * FROM telefonski_imenik ORDER BY id");
 
+        // Loop over results
+        while(results.next()){
+            // Assign each individual column to variable
+            int ID = results.getInt("ID");
+            String ime = results.getString("Ime");
+            String priimek = results.getString("Priimek");
+            String naslov = results.getString("Naslov");
+            String email = results.getString("Email");
+            String telefon = results.getString("Telefon");
+            String mobilniTelefon = results.getString("Mobilni_telefon");
+            String opomba = results.getString("Opomba");
+
+            // Set variables to object
+            seznamKontaktov.add(new Kontakt(ID, ime, priimek, naslov, email, telefon, mobilniTelefon, opomba));
+        }
+
+        // Now output the arrayList seznamKontaktov to a file named kontakti.ser
+        try{
+            FileOutputStream fileOutputStream = new FileOutputStream("Kontakti.ser");
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(seznamKontaktov);
+            objectOutputStream.close();
+            fileOutputStream.close();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
 
     /**
      * Pereberi serializiran seznam kontakotv iz diska
      */
-    public void naloziSerializiranSeznamKontakotv() {
-        // TODO: So this is related to serializirajSeznamKontaktov(), so we have to accept the .ser file and deserialize it to the arraylist?
+    public void naloziSerializiranSeznamKontakotv() throws SQLException {
+        // Clearing arrayList and resetting to prevent overloading of arraylist
+        seznamKontaktov.clear();
+        serializirajSeznamKontaktov();
 
+        // Load file to seznamKontaktov
+        try{
+            FileInputStream fileInputStream = new FileInputStream("Kontakti.ser");
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
 
-        System.out.println("Metoda še ni implementirana");
+            seznamKontaktov = (List<Kontakt>) objectInputStream.readObject();
+            objectInputStream.close();
+            fileInputStream.close();
+        }catch(IOException | ClassNotFoundException e){
+            System.out.println("Datoteka Kontakti.ser verjetno ne obstaja...");
+        }
+
+        // Then we have to show results of seznamKontaktov after deserialization
+        System.out.println("ID, Ime, Priimek, Naslov, Email, Telefon, Mobilni telefon, Opomba");
+        for (Kontakt kontakt : seznamKontaktov) {
+            System.out.print(kontakt.getId() + ", ");
+            System.out.print(kontakt.getIme() + ", ");
+            System.out.print(kontakt.getPriimek() + ", ");
+            System.out.print(kontakt.getNaslov() + ", ");
+            System.out.print(kontakt.getEmail() + ", ");
+            System.out.print(kontakt.getTelefon() + ", ");
+            System.out.print(kontakt.getMobilniTelefon() + ", ");
+            System.out.print(kontakt.getOpomba());
+
+            //Create new line
+            System.out.println();
+        }
     }
 
     /**
      * Izvozi seznam kontakov CSV datoteko.
      * Naj uporabnik sam izbere ime izhodne datoteke.
      */
-    public void izvoziPodatkeVCsvDatoteko() {
-        System.out.println("Metoda še ni implementirana");
+    public void izvoziPodatkeVCsvDatoteko() throws IOException, SQLException {
+        // Clearing arrayList and resetting to prevent overloading of arraylist
+        seznamKontaktov.clear();
+        serializirajSeznamKontaktov();
+
+        System.out.println("Vnesite ime datoteke: ");
+        Scanner scanner = new Scanner(System.in);
+        String imeDatoteke = scanner.nextLine();
+
+        while(imeDatoteke.matches(".*[\\\\/:*\"<>|].*")){
+            System.out.println("Nedovoljeni znak, vnesite ime datoteke brez: \\, /, :, *, \", <, >, |");
+            imeDatoteke = scanner.nextLine();
+        }
+
+        File file = new File(imeDatoteke);
+
+        FileWriter fileWriter = new FileWriter(file + ".csv");
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+        bufferedWriter.write("ID, Ime, Priimek, Naslov, Email, Telefon, Mobilni Telefon, Opomba");
+        bufferedWriter.newLine();
+
+        for(Kontakt kontakt : seznamKontaktov){
+            bufferedWriter.write(
+                    kontakt.getId() + "," +
+                    kontakt.getIme() + "," +
+                    kontakt.getPriimek() + "," +
+                    kontakt.getNaslov() + "," +
+                    kontakt.getEmail() + "," +
+                    kontakt.getTelefon() + "," +
+                    kontakt.getMobilniTelefon() + "," +
+                    kontakt.getOpomba()
+            );
+            bufferedWriter.newLine();
+        }
+
+        bufferedWriter.close();
+        fileWriter.close();
+
+        System.out.println("Operacija uspešno izvedena!");
+    }
+
+    public void iskanjePodatkovPoImenuAliPriimku() throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Priimek ali ime(Vnesite P za priimek, I za ime): ");
+        String ImeAliPriimek = scanner.nextLine();
+
+        if(ImeAliPriimek.equals("I")){
+            iskanjePodatkovPoImenu();
+        }else if(ImeAliPriimek.equals("P")){
+            iskanjePodatkovPoPriimku();
+        }else{
+            System.out.println("Nepravilni izbor!");
+        }
     }
 
     private void executeUpdateStatement(PreparedStatement preparedStatement) {
@@ -276,6 +390,38 @@ public class TelefonskiImenik {
 
         int count = Integer.parseInt(results.getString(1));
         return count > 0;
+    }
 
+    private void iskanjePodatkovPoImenu() throws SQLException {
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Vnesite iskalni niz(Ime):");
+        String iskalniNizIme = scanner.nextLine();
+
+        PreparedStatement preparedStatement = Main
+                .grabConnection()
+                .prepareStatement("SELECT * FROM telefonski_imenik WHERE Ime LIKE ?");
+
+        preparedStatement.setString(1, "%" + iskalniNizIme + "%");
+
+        ResultSet results = preparedStatement.executeQuery();
+
+        printResults(results);
+    }
+
+    private void iskanjePodatkovPoPriimku() throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Vnesite iskalni niz(Priimek):");
+        String iskalniNizpriimek = scanner.nextLine();
+
+        PreparedStatement preparedStatement = Main
+                .grabConnection()
+                .prepareStatement("SELECT * FROM telefonski_imenik WHERE Priimek LIKE ?");
+
+        preparedStatement.setString(1, "%" + iskalniNizpriimek + "%");
+
+        ResultSet results = preparedStatement.executeQuery();
+
+        printResults(results);
     }
 }

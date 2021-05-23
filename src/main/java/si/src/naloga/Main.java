@@ -2,36 +2,31 @@ package si.src.naloga;
 
 import si.src.naloga.imenik.TelefonskiImenik;
 
-import java.sql.*;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Main {
+    public static boolean customDatabase = false;
 
-    public static void main(String[] args) throws SQLException {
+    public final static String defaultUrlBaze = "jdbc:mysql://localhost:3306/telefonski_imenik";
+    public final static String defaultUporabniskoImeBaze = "root";
+    public final static String defaultGesloBaze = "wearenumberone";
 
-        // TODO: Okay so we have to make a CRUD Database app, well the first thing we should do is check if a
-        //  connection to the database is even possible.
-        //  If it is possible, then connect and proceed with the program,
-        //  but if the connection isn't possible read the contents of the SQL base from a file
+    public static String customUrlBaze = "";
+    public static String customUporabniskoImeBaze = "";
+    public static String customGesloBaze = "";
 
-        try {
-            // Checking if connection to database is possible
-           DriverManager.getConnection("jdbc:mysql://localhost:3306/telefonski_imenik",
-                    "root", "wearenumberone");
-            System.out.println("Connection to database was successful!");
-        }
-        catch (SQLException throwables) {
-            throwables.printStackTrace();
-            System.out.println("Connection to database was not successful!");
-            System.out.println("Reading contents of database from file...");
-            // TODO: This is probably the .ser file?
-        }
-
+    public static void main(String[] args) throws SQLException, IOException {
+        Scanner in = new Scanner(System.in);
         TelefonskiImenik telefonskiImenik = new TelefonskiImenik();
 
+        izborPodatkovneBaze();
+        preverjanjePovezaveDoBaze(telefonskiImenik);
         izpisiMenu();
 
-        Scanner in = new Scanner(System.in);
         String akcija = "";
 
         // zanka za izris menija
@@ -66,6 +61,9 @@ public class Main {
                 case "9":
                     telefonskiImenik.izvoziPodatkeVCsvDatoteko();
                     break;
+                case "A":
+                    telefonskiImenik.iskanjePodatkovPoImenuAliPriimku();
+                    break;
                 case "0":
                     System.exit(0);
                     break;
@@ -78,17 +76,20 @@ public class Main {
         }
     }
 
-    // TODO: Since this is a database app, the reviewers of this code will have to modify this.
+    // if customDatabase is true then we use the customDatabase else we use the default one,
+    // I imagine the reviewers of my code will use the customDatabase so this feature is a must have
     public static Connection grabConnection() throws SQLException {
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/telefonski_imenik",
-                "root", "wearenumberone");
+        if(customDatabase){
+            return DriverManager.getConnection(customUrlBaze, customUporabniskoImeBaze, customGesloBaze);
+        }else{
+            return DriverManager.getConnection(defaultUrlBaze, defaultUporabniskoImeBaze, defaultGesloBaze);
+        }
     }
 
-    /**
-     * Uporabniku izpišemo menu
-     */
+        /**
+         * Uporabniku izpišemo menu
+         */
     public static void izpisiMenu() {
-
         System.out.println("");
         System.out.println("");
         System.out.println("Aplikacija telefonski imenik:");
@@ -103,11 +104,45 @@ public class Main {
         System.out.println("7 - Shrani kontakte na disk (serializacija)");
         System.out.println("8 - Preberi kontake iz serializirano datoteke");
         System.out.println("9 - Izvozi kontakte v csv");
+        System.out.println("A - Iskanje kontaktov po imenu ali priimku");
         System.out.println("");
         System.out.println("0 - Izhod iz aplikacije");
         System.out.println("-----------------------------------");
         System.out.println("Akcija: ");
+    }
 
+    private static void izborPodatkovneBaze() {
+        Scanner in = new Scanner(System.in);
+        System.out.println("0 - Poveži na default podatkvno bazo");
+        System.out.println("1 - Poveži na custom podatkovno bazo");
+        String kateraBaza = in.nextLine();
 
+        if(kateraBaza.equals("0")){
+            customDatabase = false;
+        }else{
+            customDatabase = true;
+            System.out.println("Vnesite url vaše baze: ");
+            customUrlBaze = in.nextLine();
+
+            System.out.println("Vnesite uporabniško ime vaše baze: ");
+            customUporabniskoImeBaze = in.nextLine();
+
+            System.out.println("Vnesite geslo vaše baze: ");
+            customGesloBaze = in.nextLine();
+        }
+    }
+
+    private static void preverjanjePovezaveDoBaze(TelefonskiImenik telefonskiImenik) throws SQLException {
+        try {
+            // Checking if connection to database is possible
+            grabConnection();
+            System.out.println("Povezava do baze je bila uspešna!");
+        }
+        catch (SQLException e) {
+            // If it isn't possible then display unsuccessful message and show contents of Kontakt.ser:
+            System.out.println("Povezava do baze je bila neuspešna!");
+            System.out.println("Branje podatkov iz datoteke Kontakt.ser");
+            telefonskiImenik.naloziSerializiranSeznamKontakotv();
+        }
     }
 }

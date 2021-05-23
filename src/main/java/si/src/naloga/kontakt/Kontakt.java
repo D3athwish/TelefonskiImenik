@@ -62,7 +62,7 @@ public class Kontakt implements Serializable {
         this.naslov = naslov;
     }
 
-    public String getElektronskaPosta() {
+    public String getEmail() {
         return elektronskaPosta;
     }
 
