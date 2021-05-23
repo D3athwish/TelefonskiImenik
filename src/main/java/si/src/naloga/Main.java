@@ -76,8 +76,8 @@ public class Main {
         }
     }
 
-    // if customDatabase is true then we use the customDatabase else we use the default one,
-    // I imagine the reviewers of my code will use the customDatabase so this feature is a must have
+    // Če je customDatabase == true, potem uporabnik vnese svoje podatke za dostop do baze, v nasprotnem primeru
+    // se uporabljajo default vrednosti (Moje lokalno okolje)
     public static Connection grabConnection() throws SQLException {
         if(customDatabase){
             return DriverManager.getConnection(customUrlBaze, customUporabniskoImeBaze, customGesloBaze);
@@ -134,12 +134,12 @@ public class Main {
 
     private static void preverjanjePovezaveDoBaze(TelefonskiImenik telefonskiImenik) throws SQLException {
         try {
-            // Checking if connection to database is possible
+            // Preverjanje če je povezava do baze mozna
             grabConnection();
             System.out.println("Povezava do baze je bila uspešna!");
         }
         catch (SQLException e) {
-            // If it isn't possible then display unsuccessful message and show contents of Kontakt.ser:
+            // Če povezava do baze ni mozna, potem pokazi sporočilo da ni mozno in preberi podatke iz Kontakt.ser
             System.out.println("Povezava do baze je bila neuspešna!");
             System.out.println("Branje podatkov iz datoteke Kontakt.ser");
             telefonskiImenik.naloziSerializiranSeznamKontakotv();
